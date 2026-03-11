@@ -1,0 +1,47 @@
+Check Current Infrastructure State
+
+Run:
+
+terraform state list
+
+You should see resources like:
+
+aws_instance.jenkins
+aws_instance.docker
+aws_instance.app
+aws_instance.k3s
+aws_instance.monitoring
+aws_instance.sonarqube
+
+
+
+Command to generate inventory.ini automatically
+
+Run
+
+terraform output -json | jq -r '
+"[jenkins]
+\(.jenkins_ip.value)
+
+[docker]
+\(.docker_ip.value)
+
+[sonarqube]
+\(.sonarqube_ip.value)
+
+[app]
+\(.app_ip.value)
+
+[k3s]
+\(.k3s_ip.value)
+
+[monitoring]
+\(.monitoring_ip.value)
+"' > inventory.ini
+
+
+Test SSH Connectivity
+
+Run:
+
+ansible -i inventory.ini all -m ping -u ubuntu --private-key server.pem
