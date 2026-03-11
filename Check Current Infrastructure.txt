@@ -45,3 +45,53 @@ Test SSH Connectivity
 Run:
 
 ansible -i inventory.ini all -m ping -u ubuntu --private-key server.pem
+
+
+Step 1 — Create Playbook
+
+Run:
+
+nano base_setup.yml
+
+Paste:
+
+---
+- name: Base configuration for all servers
+  hosts: all
+  become: yes
+
+  tasks:
+
+  - name: Update apt packages
+    apt:
+      update_cache: yes
+
+  - name: Upgrade system packages
+    apt:
+      upgrade: dist
+
+  - name: Install common utilities
+    apt:
+      name:
+        - git
+        - curl
+        - unzip
+        - htop
+      state: present
+
+Save and exit.
+
+Step 2 — Run the Playbook
+
+Run:
+
+ansible-playbook -i inventory.ini base_setup.yml -u ubuntu --private-key server.pem
+
+Ansible will connect to all servers:
+
+jenkins
+docker
+sonarqube
+app
+k3s
+monitoring
