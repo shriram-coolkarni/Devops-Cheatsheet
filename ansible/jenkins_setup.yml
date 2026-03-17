@@ -11,23 +11,34 @@
       state: present
       update_cache: yes
 
-  - name: Add Jenkins key
-    apt_key:
-      url: https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+  - name: Install required packages
+    apt:
+      name:
+        - curl
+        - gnupg
       state: present
 
-  - name: Add Jenkins repository
-    apt_repository:
-      repo: deb https://pkg.jenkins.io/debian-stable binary/
-      state: present
+  - name: Add Jenkins GPG key (new method)
+    shell: |
+      curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | sudo tee \
+      /usr/share/keyrings/jenkins-keyring.asc > /dev/null
+
+  - name: Add Jenkins repository (signed-by method)
+    shell: |
+      echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
+      https://pkg.jenkins.io/debian-stable binary/" | sudo tee \
+      /etc/apt/sources.list.d/jenkins.list > /dev/null
+
+  - name: Update apt cache
+    apt:
+      update_cache: yes
 
   - name: Install Jenkins
     apt:
       name: jenkins
       state: present
-      update_cache: yes
 
-  - name: Start Jenkins service
+  - name: Start Jenkins
     service:
       name: jenkins
       state: started
